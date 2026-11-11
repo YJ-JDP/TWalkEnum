@@ -44,6 +44,24 @@ python3 scripts/verify_package.py
 
 Correctness tests compare complete edge-ID sequence multisets with independent exhaustive DFS. Other tests check execution, data formats and experiment parameters.
 
+## Minimal reproduction (no graph download)
+
+All measurements are shipped, so the tables and figures of the paper can be
+regenerated without downloading any graph:
+
+```bash
+python3 scripts/verify_package.py
+python3 run.py summarize
+python3 -m pip install -r requirements-plot.txt
+python3 scripts/plot_results.py
+```
+
+The first command checks every shipped file against `SHA256SUMS.tsv`, the second
+writes the paper tables to `results/paper_tables/`, and the last writes the
+figures to `results/figures/`. The mapping between files and paper items is in
+[docs/ARTIFACTS.md](docs/ARTIFACTS.md). Running the experiments themselves
+additionally requires the graph inputs described below.
+
 ## Prepare graph inputs
 
 Download graph datasets separately; sources and preparation details are in [docs/DATASETS.md](docs/DATASETS.md). Each prepared input contains three integer columns:
@@ -120,6 +138,15 @@ python3 scripts/plot_results.py
 
 Generated tables and figures are written to `results/` and are not distributed with the source files. Measured times depend on the machine.
 
+## Citation
+
+Citation metadata are in [CITATION.cff](CITATION.cff). A version tag of this
+repository accompanies the submission.
+
 ## References and permissions
 
-Method references are in [docs/REFERENCES.md](docs/REFERENCES.md). Usage terms are in [LICENSE](LICENSE). Graph inputs remain subject to their providers' terms.
+Method references are in [docs/REFERENCES.md](docs/REFERENCES.md).
+Code is released under the MIT license ([LICENSE](LICENSE)); measurements,
+queries and documentation are released under CC BY 4.0
+([LICENSE-DATA](LICENSE-DATA)). Graph inputs are not distributed here and remain
+subject to their providers' terms (see [docs/DATASETS.md](docs/DATASETS.md)).

@@ -1,0 +1,9 @@
+Data licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+The measurements in data/, the fixed queries in queries/, and the documentation
+in this repository are released under CC BY 4.0:
+https://creativecommons.org/licenses/by/4.0/
+
+The prepared graph inputs are not distributed here. They remain subject to the
+terms of the collections listed in data/dataset_catalog.tsv; this repository
+claims no rights over them.

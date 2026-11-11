@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the accompanying paper."
+title: "TWalkEnum: Enumerating Temporal Walks with Consecutive Time-Gap Constraints"
+abstract: "Code, fixed query workloads and raw measurements for enumerating s-t temporal walks under consecutive time-gap constraints."
+type: software
+version: 1.0.0
+date-released: "2026-11-12"
+license: MIT
+repository-code: "https://github.com/YJ-JDP/TWalkEnum"
+authors:
+  - family-names: Yin
+    given-names: Junjie
+  - family-names: Chen
+    given-names: Liuyi
+  - family-names: Yang
+    given-names: Zhibang
+  - family-names: Yang
+    given-names: Zhengyi
+  - family-names: Tang
+    given-names: Zhuo
+  - family-names: Zhou
+    given-names: Xu
