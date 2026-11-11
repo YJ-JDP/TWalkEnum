@@ -219,7 +219,7 @@ def recompute(raw_directory, output_directory):
     for (graph,), values in groups(full, ['graph']).items():
         total = mean([number(r['online_total_ms']) for r in values])
         row = dict(graph=graph, n=len(values), mean_total_ms=total)
-        for field in ['filter_ms', 'support_build_ms', 'ranges_ms', 'plan_ms', 'prefix_ms', 'suffix_ms', 'search_ms']:
+        for field in ['filter_ms', 'ranges_ms', 'plan_ms', 'prefix_ms', 'suffix_ms', 'search_ms']:
             row['mean_' + field] = mean([number(r[field]) for r in values])
             row[field + '_pct_total'] = row['mean_' + field]*100/total
         stage.append(row)

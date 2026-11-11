@@ -1,4 +1,4 @@
-graph	dataset	gap	query_id	base_query_id	query_seed	src_internal	dst_internal	x1	x2	delta_min	delta_max	answers	full_ms_ref
+graph	dataset	gap	query_id	base_query_id	query_seed	src_internal	dst_internal	x1	x2	delta_min	delta_max	reference_answers	full_ms_ref
 EU	email-Eu	10-20	688	344	3832933909989689701	462	63	18018552	31799572	1378102	2756204	3047131091.0	4107.2
 EU	email-Eu	10-20	448	224	11154689495176643823	13	194	9772059	22006361	1223431	2446861	2211653957.0	3568.8
 EU	email-Eu	10-20	182	91	10641249396570637627	21	2	19420251	32005975	1258573	2517145	3552231940.0	3527.2

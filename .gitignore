@@ -2,6 +2,7 @@ kernels/*/build/
 **/__pycache__/
 *.pyc
 /runs/
+/results/
 /validation/
 /cache/
 /.benchmark.lock

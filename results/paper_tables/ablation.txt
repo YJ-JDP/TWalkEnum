@@ -1,7 +1,0 @@
-Mean online query time (s); timeouts contribute 120 s.
-
-graph	EventDAG+DFS	EventDAG+BiReach+DFS	ChronoFilter+DirectDFS	TWalkEnum w/o ChronoFilter	TWalkEnum with random windows	TWalkEnum
-EU	120.00	23.87	23.63	12.05	18.41	2.77
-WT	111.78	7.40	6.44	67.42	6.94	2.33
-sAU	120.00	13.82	13.99	20.17	14.95	1.53
-sSO	120.00	22.88	17.65	117.06	21.04	18.30

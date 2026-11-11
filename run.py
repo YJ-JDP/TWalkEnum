@@ -36,7 +36,7 @@ def build_backends(args):
         subprocess.run([args.cmake, "--build", str(source / "build"), "-j", str(args.jobs)], check=True)
 
 def main():
-    parser = argparse.ArgumentParser(description="Fixed-query TWalkEnum experiments")
+    parser = argparse.ArgumentParser(description="TWalkEnum experiments")
     commands = parser.add_subparsers(dest="command", required=True)
     config = commands.add_parser("configure")
     config.add_argument("--data-dir", required=True)

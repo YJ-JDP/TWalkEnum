@@ -38,6 +38,6 @@ def validate_data():
     write_table(ROOT/"validation/data_validation.tsv",checks)
     report=dict(status="PASS",table_rows={r["experiment"]:r["rows"] for r in checks},planned_cases=planned,
                 response_rules=dict(Counter(r["rule"] for r in response)),
-                note="Response runs cover the selected independent probes; other thresholds come from main runs.")
+                note="Response thresholds are recorded during complete runs or separate response runs.")
     (ROOT/"validation/data_validation.json").write_text(json.dumps(report,indent=2),encoding="utf-8")
     return report

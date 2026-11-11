@@ -14,7 +14,7 @@ struct DagRanges {
 
 struct Run {
     SearchMetrics search;
-    double dagMs = 0, pruneMs = 0, filterMs = 0, supportMs = 0, rangesMs = 0, planMs = 0;
+    double dagMs = 0, pruneMs = 0, filterMs = 0, rangesMs = 0, planMs = 0;
     std::uint64_t eligible = 0, retained = 0, arcs = 0, retainedArcs = 0, dagBytes = 0;
 };
 
@@ -44,10 +44,8 @@ Run execute(const Graph& graph, const Query& q, int method, Deadline& deadline, 
             run.filterMs = elapsedMs(start);
             tight = makeTightGraph(graph, q, std::move(filtered.edgeIds));
         }
-        run.supportMs = elapsedMs(start);
         run.retained = tight.edgeIds.size();
         stage("filter_ms", run.filterMs, quiet);
-        stage("support_build_ms", run.supportMs, quiet);
         check(deadline);
         start = Clock::now();
         auto stats = buildSuccessorStats(tight, deadline);
@@ -276,7 +274,7 @@ int main(int argc, char** argv) {
             record.set("status",(run.search.timedOut||deadline.pollNow())?"TIMEOUT":"OK");
             record.setDouble("online_total_ms",elapsedMs(start));
             record.setDouble("dag_build_ms",run.dagMs);record.setDouble("dag_prune_ms",run.pruneMs);
-            record.setDouble("filter_ms",run.filterMs);record.setDouble("support_build_ms",run.supportMs);
+            record.setDouble("filter_ms",run.filterMs);
             record.setDouble("ranges_ms",run.rangesMs);
             record.setDouble("plan_ms",run.planMs);record.setDouble("prefix_ms",run.search.prefixMs);
             record.setDouble("suffix_ms",run.search.suffixMs);record.setDouble("search_ms",run.search.totalMs);

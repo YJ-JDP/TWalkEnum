@@ -1,9 +1,0 @@
-bucket	delta_low_pct	maximum_hops	bound_status	timeout_pct
-1	0		no_uniform_bound	34.25
-2	1.25	81	theoretical_upper_bound	20.41666666666666666666666666666666666667
-3	2.5	41	theoretical_upper_bound	17.08333333333333333333333333333333333333
-4	5	21	theoretical_upper_bound	9.083333333333333333333333333333333333333
-5	10	11	theoretical_upper_bound	1.166666666666666666666666666666666666667
-6	20	6	theoretical_upper_bound	0
-7	40	3	theoretical_upper_bound	0
-8	80	2	theoretical_upper_bound	0

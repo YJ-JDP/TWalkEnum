@@ -9,4 +9,4 @@ Baseline labels identify adaptations to the gap-constrained temporal-walk task; 
 - KONECT dataset collection: https://konect.cc/.
 - ORBITAAL: https://zenodo.org/records/12581515.
 
-Prepared input versions are fixed by the artifact manifest rather than by a mutable upstream download.
+Prepared graph inputs are identified by the hashes in the artifact manifest.

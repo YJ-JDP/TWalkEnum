@@ -2,116 +2,124 @@
 
 Code and experimental data for *TWalkEnum: Enumerating Temporal Walks with Consecutive Time-Gap Constraints*.
 
-TWalkEnum enumerates source-to-target temporal walks under lower and upper bounds on consecutive time gaps. ChronoFilter computes the exact edge support, GapBalance selects a temporal window, and PivotEnum shares suffix searches at window entries. PoolIndex reuses transition information for queries with fixed gap constraints.
+ChronoFilter constructs the exact edge support, GapBalance selects a temporal window, and PivotEnum shares suffix searches. PoolIndex reuses transition information across queries with the same gap constraints.
 
 ## Compile
 
-Requirements: Python 3.8+, CMake 3.16+, and a 64-bit C++17 compiler. The experiments use GCC on Linux.
+The primary environment is Linux with GCC 9 or later, CMake 3.16 or later, and Python 3.8 or later. GCC must support C++17.
+
+On Ubuntu:
 
 ```bash
+sudo apt update
+sudo apt install g++ cmake make python3 python3-pip
 python3 run.py build
 ```
 
-To build only the ablation backend:
+Build a single backend with:
 
 ```bash
 python3 run.py build --backend ablation
 ```
 
+On Windows, use MinGW-w64 GCC and Ninja. With MSYS2 UCRT64 installed at `C:\msys64`, run in PowerShell:
+
+```powershell
+$env:PATH = "C:\msys64\ucrt64\bin;" + $env:PATH
+python -m pip install cmake ninja
+python run.py build --generator Ninja --compiler C:/msys64/ucrt64/bin/g++.exe
+```
+
+Adjust the compiler path to your installation. The Windows procedure uses GCC, not Visual Studio's compiler.
+
 ## Test
+
+Build the backends before running the native tests:
 
 ```bash
 python3 -m unittest discover -s tests -v
 python3 scripts/check_data.py
+python3 scripts/verify_package.py
 ```
 
-The tests compare complete edge-ID sequence multisets with independent exhaustive DFS on small graphs and check experiment execution, output formats and fixed-query plans.
+Correctness tests compare complete edge-ID sequence multisets with independent exhaustive DFS. Other tests check execution, data formats and experiment parameters.
 
-## Preprocessing
+## Prepare graph inputs
 
-Graph datasets are downloaded separately. Each prepared input has three integer columns:
+Download graph datasets separately; sources and preparation details are in [docs/DATASETS.md](docs/DATASETS.md). Each prepared input contains three integer columns:
 
 ```text
 source destination timestamp
 ```
 
-Retain duplicate edges and row order. Fixed queries use internal vertex IDs assigned by the supplied loader, so the prepared inputs must match `data/graph_manifest.tsv`. Source links and preparation instructions are in [docs/DATASETS.md](docs/DATASETS.md).
+Preserve duplicate edges and row order. Queries use the internal vertex IDs assigned by the supplied loader. Input hashes and graph statistics are listed in `data/graph_manifest.tsv`.
 
 ```bash
 python3 scripts/prepare_data.py --input-dir /path/to/prepared_graphs --out /path/to/graphs --configure
 ```
 
-Fixed workloads are in `queries/`. Newly generated queries require new measurements.
+## Run experiments
 
-## Execute
+Query inputs are provided in `queries/`. The response, component and parallel experiments use queries from the main experiment; each experiment reads its corresponding query file.
 
 ```bash
 python3 run.py run main
 ```
 
-Available experiments:
-
-| Name | Experiment |
+| Experiment | Measurements |
 |---|---|
-| `main` | Query time, result count and query workspace |
-| `response` | Time to the 1,000th result |
-| `gap` | Gap interval selection |
-| `ablation` | Component effects and event-transition DAG baselines |
-| `parallel` | Parallel enumeration |
-| `index_build` | Index construction and space |
+| `main` | Query time, answer count and query workspace |
+| `response` | Time to the 1,000th answer |
+| `gap` | Timeout rates under different gap intervals |
+| `ablation` | Component variants and event-transition DAG baselines |
+| `parallel` | Query time at different thread counts |
+| `index_build` | Index construction time and space |
 | `index_filter` | Filtering with three index layouts |
 | `online_filter` | Filtering without an index |
-| `index_online` | Fixed-gap query streams |
-| `correctness` | Full sequence multiset comparison |
+| `index_online` | Query streams sharing gap constraints |
+| `correctness` | Full answer multiset comparisons |
 
-To run all ablation configurations with one command:
+Run all ablation configurations with:
 
 ```bash
 bash scripts/run_ablation.sh /path/to/graph/files
 ```
 
-For background execution:
+Ablation uses 20 queries on each of EU, WT, sAU and sSO under [10%,20%]. Six configurations run once per query; the random-window configuration runs with five seeds. This gives 11 executions per query and 880 executions in total. Each execution uses a separate process, one thread and a 120-second online limit. Graph loading is excluded. No storage or path-count budget is configured.
 
-```bash
-nohup bash scripts/run_ablation.sh /path/to/graph/files > ablation.log 2>&1 &
-```
-
-The ablation workload has 20 queries on each of EU, WT, sAU and sSO under [10%,20%]. Seven configurations and five random windows per query give 880 executions. Each configuration runs in a separate process with one thread and a 120-second online limit. Graph loading is excluded; no storage or path-count budget is configured.
-
-Completed configurations are retained. After an interruption, continue with:
+New measurements are written to `runs/`. To continue an interrupted run:
 
 ```bash
 python3 run.py run ablation --graphs configs/ablation_graphs.tsv --retry-interrupted
 ```
 
-New measurements are written to `runs/`, without overwriting the supplied data. Timing results depend on the machine.
+For background execution on Linux:
 
-## Output
+```bash
+nohup bash scripts/run_ablation.sh /path/to/graph/files > ablation.log 2>&1 &
+```
 
-We count results without storing the complete result set in the performance experiments. Correctness tests construct complete edge-ID sequences and compare their multisets.
+## Data and outputs
 
 | Location | Contents |
 |---|---|
-| `data/raw/` | Per-query measurements |
-| `queries/` | Fixed query workloads |
-| `results/paper_tables/` | Recomputed tables and plotting inputs |
-| `results/figures/` | Experimental figures |
-| `runs/ablation/raw.tsv` | New ablation measurements |
-| `runs/ablation/ablation_summary.tsv` | New ablation summary |
+| `data/raw/` | Query measurements and index construction records |
+| `queries/` | Experiment query inputs and reference counts |
+| `configs/` | Experiment settings and table schemas |
+| `runs/` | New execution outputs |
 
-Regenerate tables and figures:
+Performance experiments count answers without storing the complete answer set. Correctness tests construct full edge-ID sequences. Field meanings and statistical definitions are in [DATA.md](DATA.md).
+
+Generate tables and figures locally with:
 
 ```bash
 python3 run.py summarize
-python3 scripts/check_paper_values.py
 python3 -m pip install -r requirements-plot.txt
 python3 scripts/plot_results.py
 ```
 
-Table III uses six ablation configurations. The complete summary also includes EventDAG+BiReach+SuffixSharing. Random-window times are averaged within each query before computing the graph mean. Field definitions and statistical rules are in [DATA.md](DATA.md).
+Generated tables and figures are written to `results/` and are not distributed with the source files. Measured times depend on the machine.
 
-## Datasets
+## References and permissions
 
-This repository includes experimental measurements and fixed queries, but no graph datasets. Download sources are listed in [docs/DATASETS.md](docs/DATASETS.md); dataset metadata are in `data/dataset_catalog.tsv` and `data/graph_manifest.tsv`.
-
-Method references are in [docs/REFERENCES.md](docs/REFERENCES.md). Usage terms are in [RIGHTS.md](RIGHTS.md).
+Method references are in [docs/REFERENCES.md](docs/REFERENCES.md). Usage terms are in [LICENSE](LICENSE). Graph inputs remain subject to their providers' terms.

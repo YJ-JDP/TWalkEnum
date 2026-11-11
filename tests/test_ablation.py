@@ -14,22 +14,22 @@ class AblationTests(unittest.TestCase):
     def test_packaged_metrics_match_output_contract(self):
         schema = json.loads((ROOT/'configs/schemas.json').read_text())['ablation']
         self.assertEqual(FIELDS, schema['fields'])
+        self.assertNotIn('reference_answers', FIELDS)
+        self.assertNotIn('support_build_ms', FIELDS)
         rows = read_table(ROOT/schema['file'])
         self.assertEqual(len(rows), schema['rows'])
         for row in rows:
             self.assertEqual(list(row), FIELDS)
             for left, right in [('answers', 'path_count'), ('event_id_volume', 'output_edge_ids')]:
                 self.assertEqual(row[left], row[right])
-            if row['support_build_ms'] and row['filter_ms']:
-                self.assertGreaterEqual(Decimal(row['support_build_ms']), Decimal(row['filter_ms']))
             if row['status'] == 'OK':
-                for field in ['support_build_ms', 'ranges_ms', 'plan_ms', 'search_ms',
+                for field in ['ranges_ms', 'plan_ms', 'search_ms',
                               'prefix_ms', 'suffix_ms', 'answers', 'event_id_volume']:
                     self.assertNotEqual(row[field], '', (row['method'], field))
             expected = Decimal(120000) if row['status'] == 'TIMEOUT' else Decimal(row['online_total_ms'])
             self.assertEqual(Decimal(row['capped_ms']), expected)
 
-    def test_all_configurations_and_fixed_queries(self):
+    def test_all_configurations_and_queries(self):
         cases = make_cases(read_table(ROOT/'queries/ablation.tsv'))
         self.assertEqual(len(cases), 880)
         self.assertEqual({int(r['method_id']) for r in cases}, set(METHODS))
@@ -61,10 +61,9 @@ class AblationTests(unittest.TestCase):
             self.assertEqual({r['status'] for r in rows},{'OK'})
             self.assertEqual(list(rows[0]), FIELDS)
             for row in rows:
-                for field in ['filter_ms', 'support_build_ms', 'ranges_ms', 'plan_ms',
+                for field in ['filter_ms', 'ranges_ms', 'plan_ms',
                               'search_ms', 'prefix_ms', 'suffix_ms']:
                     self.assertNotEqual(row[field], '', (row['method'], field))
-                self.assertGreaterEqual(Decimal(row['support_build_ms']), Decimal(row['filter_ms']))
             saved = raw.read_bytes()
             second = subprocess.run(command,capture_output=True,text=True,timeout=60)
             self.assertEqual(second.returncode,0,second.stdout+second.stderr)
@@ -88,10 +87,32 @@ class AblationTests(unittest.TestCase):
                  patch('src.ablation.time.monotonic',side_effect=[0,121]):
                 row=run_one(Path('worker'),Path('cache'),q,directory)
             self.assertEqual(row['status'],'TIMEOUT')
-            self.assertEqual(row['reference_answers'],'1234')
+            self.assertNotIn('reference_answers', row)
+            self.assertEqual(q['reference_answers'], '1234')
             self.assertEqual(row['answers'],'')
             self.assertEqual(row['path_count'],'')
             self.assertTrue(all(p.poll() is not None for p in processes))
+
+    def test_reference_mismatch_preserves_measured_count(self):
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            stub = directory/'worker.py'
+            stub.write_text(
+                'import sys\nprint("READY\\t0", flush=True)\nsys.stdin.readline()\n'
+                'print("TPATH_RESULT_V1\\nstatus\\tOK\\nonline_total_ms\\t1.0'
+                '\\nanswers\\t2\\nevent_id_volume\\t2\\nDONE", flush=True)\n')
+            original = subprocess.Popen
+            def launch(command, **kwargs):
+                return original([sys.executable, str(stub)], **kwargs)
+            query = make_cases([dict(graph='EU', query_id='1', src_internal='0',
+                dst_internal='1', x1='0', x2='10', delta_min='1', delta_max='2',
+                reference_answers='3')])[0]
+            with patch('src.ablation.subprocess.Popen', side_effect=launch):
+                row = run_one(Path('worker'), Path('cache'), query, directory)
+            self.assertEqual(row['status'], 'ERROR')
+            self.assertEqual(row['termination'], 'answer_mismatch')
+            self.assertEqual(row['answers'], '2')
+            self.assertNotIn('reference_answers', row)
 
 if __name__ == '__main__':
     unittest.main()

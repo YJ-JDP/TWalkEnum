@@ -55,4 +55,4 @@ def export_runs(run_directory, output_directory):
         if len(rows)!=schemas[name]["rows"]:
             raise ValueError("incomplete output: "+name)
     for name,rows in tables.items():write_table(target/(name+".tsv"),rows,schemas[name]["fields"])
-    print("Exported fixed-query results; packaged measurements were not changed.")
+    print("Export finished.")

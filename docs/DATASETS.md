@@ -21,7 +21,7 @@ For SMS-A, the SNAP page links to the original study and data. SD and PR use the
 
 ## Input format
 
-Each prepared input is a whitespace-separated text file with three integer columns: `source destination timestamp`. Keep duplicate events and their row order. Vertex IDs are assigned internally in first-appearance order. Fixed queries therefore require the corresponding prepared input, including its timestamp normalization and row order. Upstream downloads may have different headers, columns, or time units; source-page links do not assert byte-identical files.
+Each prepared input is a whitespace-separated text file with three integer columns: `source destination timestamp`. Keep duplicate events and their row order. Vertex IDs are assigned internally in first-appearance order. The supplied queries therefore require the corresponding prepared input, including its timestamp normalization and row order. Upstream downloads may have different headers, columns, or time units; source-page links do not assert byte-identical files.
 
 `data/graph_manifest.tsv` records the required SHA-256 hashes, graph statistics and fingerprints. Its archive paths describe optional external prepared archives; they are not included in this package.
 
@@ -49,4 +49,4 @@ Check graphs after preparation:
 python3 scripts/check_data.py --graphs --graph-dir /path/to/graphs
 ```
 
-Inputs with mismatching hashes are rejected before fixed workloads are executed.
+Inputs with mismatching hashes are rejected before the supplied workloads are executed.

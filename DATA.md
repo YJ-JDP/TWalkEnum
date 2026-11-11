@@ -1,56 +1,55 @@
 # Data and metrics
 
-Graph inputs are external; source links are in `docs/DATASETS.md`. They have three columns: source, destination and integer timestamp. Row order and duplicate events are retained. Fixed-query internal IDs require these exact inputs. See `data/graph_manifest.tsv` for hashes, sizes, ranges and fingerprints, and `data/dataset_catalog.tsv` for original sources.
+Graph inputs are external; sources are listed in `docs/DATASETS.md`. Prepared graphs have three columns: source, destination and integer timestamp. Preserve duplicate edges and row order. The supplied queries use the internal IDs assigned by the loader. Input hashes, ranges and fingerprints are in `data/graph_manifest.tsv`.
 
-| Raw table | Rows | Use |
+## Tables
+
+| File in `data/raw/` | Records | Contents |
 |---|---:|---|
-| main.tsv | 48,000 | Query times, completion, throughput, result size and memory |
-| response.tsv | 36,000 | Query-matched response times |
-| gap.tsv | 9,600 | Gap-selection timeout rates |
-| ablation.tsv | 880 | Seven ablation configurations, including five random windows per query |
-| parallel.tsv | 1,200 | Complete query times at six thread counts |
-| index_build.tsv | 360 | Standalone index space and construction |
-| index_filter.tsv | 18,000 | Three-layout filtering comparison |
-| online_filter.tsv | 6,000 | Online filtering on matching queries |
-| index_online.tsv | 30,000 | Five-method fixed-gap query stream |
-| index_online_build.tsv | 12 | Setup and size metadata for that stream |
-| correctness.tsv | 50 | Complete event-ID sequence multiset checks |
+| main.tsv | 48,000 | Query times, answer counts and memory measurements |
+| response.tsv | 36,000 | Query-matched full and response measurements |
+| gap.tsv | 9,600 | Gap-interval measurements |
+| ablation.tsv | 880 | Seven configurations, with five seeds for random windows |
+| parallel.tsv | 1,200 | Query times at six thread counts |
+| index_build.tsv | 360 | Index space and construction times |
+| index_filter.tsv | 18,000 | Three-layout filtering measurements |
+| online_filter.tsv | 6,000 | Filtering without an index |
+| index_online.tsv | 30,000 | Five-method query-stream measurements |
+| index_online_build.tsv | 12 | Index construction measurements and setup information |
+| correctness.tsv | 50 | Full edge-ID sequence multiset checks |
 
-All 150,102 query/configuration records are retained. Fixed-index setup identifies the index used online; its times are not mixed into Table IV's separate grid workload. Schemas are in `configs/schemas.json`. Empty values mean unavailable, not zero. Integer IDs and counts are not coerced through floating point.
+Schemas are in `configs/schemas.json`. Empty cells mean unavailable, not zero. Integer IDs and counts are read without conversion to floating point. Query parameters and identifiers associate records across methods.
 
 ## Fields
 
-- `online_total_ms`: online timing. Hard-stop records may contain driver guard durations; timeout statistics use the configured 120-second cap.
-- `path_count` / `answers`: produced answers; timeout counts can be partial. Zero at timeout does not prove no answer.
-- `response_1000_ms_raw`: threshold time when recorded. Indexed `response_time_ms` means first answer, not the 1,000-answer metric.
-- `query_local_peak_bytes_estimate`: query workspace accounting, excluding the resident graph. `peak_rss_bytes` is whole-process peak RSS and is separate.
-- `enum_ms` / `enumeration_ms`: inclusive enumeration timers. Prefix/suffix are components, not additional independent phases.
-- Grid `build_ms` excludes serialization. Fixed-index `index_build_ms` includes saving; `index_algorithm_build_ms` is construction only.
+- `online_total_ms`: measured online execution time. Raw timeout durations can exceed the deadline; budgeted comparisons use the stated time cap.
+- `path_count` / `answers`: answers produced. Counts from timed-out runs can be partial.
+- `output_edge_ids` / `event_id_volume`: total edge IDs across produced answers.
+- `response_1000_ms_raw`: time to the 1,000th answer when reached. The indexed experiment's `response_time_ms` instead measures the first answer.
+- `measurement_mode`: whether a response threshold comes from the complete run or a separate response run. `response.tsv` pairs these measurements with the corresponding full-query record.
+- `query_local_peak_bytes_estimate`: query-workspace accounting, excluding the resident graph. `peak_rss_bytes` is whole-process peak RSS and is a separate metric.
+- `enumeration_ms` / `search_ms`: inclusive search time. Prefix and suffix times are components, not additional phases to add again.
+- `build_ms`: construction time for the three-layout benchmark, excluding serialization.
+- `index_build_ms`: construction and saving time for the query-stream index. `index_algorithm_build_ms` excludes saving.
+
+The twelve `index_online_build.tsv` records describe the index setup for each graph. Reference answer counts are stored with the queries and are used for correctness checks; they are separate from measured answer counts.
+
+## Ablation
+
+The seven configurations run on the same 80 queries. Six configurations run once per query; random windows use five seeds, yielding 880 executions.
+
+`filter_ms` measures the filtering scan and is empty when a separate scan measurement is unavailable. `ranges_ms` and `plan_ms` measure successor-range preparation and window selection. `prefix_ms` and `suffix_ms` are components of `search_ms`. DAG construction and pruning timers apply to explicit-DAG variants. An unused phase can be zero; an unavailable measurement is empty.
+
+The count aliases `answers`/`path_count` and `event_id_volume`/`output_edge_ids` contain the same values for compatibility with the statistics interface.
 
 ## Statistics
 
-`src/paper_statistics.py` uses Decimal arithmetic, independently checking time means with `math.fsum`. Round presentation to two decimals; compute with unrounded values.
+Times are arithmetic means. Query-time comparisons assign 120,000 ms to timeouts, and speedups are ratios of means. Parallel experiments use complete query times. Calculations use unrounded values; displayed values use two decimal places.
 
-Query times use arithmetic means with timeouts assigned 120,000 ms. Speedups are ratios of arithmetic means.
+For response time, a completed query with fewer than 1,000 answers uses its full query time. Otherwise use the recorded threshold time. A timeout before reaching the target contributes 120,000 ms. The reported response time does not exceed the corresponding budgeted full-query time.
 
-Pair responses with main records by query and method. Complete queries below 1,000 answers use total time; otherwise use the threshold. Timeout before the target contributes the limit and a censor flag. Bound response time by the corresponding capped total. Raw timers are unchanged.
+For random windows, average the five runs within each query before computing the graph mean. Memory and answer-size comparisons use the same completed queries across methods. Memory values are means of per-query peaks.
 
-For ablation, average five random windows within each query before averaging across twenty queries per graph. Table III reports arithmetic mean times for six configurations; the additional EventDAG+BiReach+SuffixSharing configuration is included in the complete summary. Each query/configuration runs in a separate process with one thread and a 120-second online limit. Graph loading is excluded. On watchdog termination, unavailable answer counts remain empty; reference_answers is a separate field.
+The filtering benchmark averages within each parameter setting and then gives equal weight to the ten settings per graph. It uses a separate workload from the query-stream benchmark; its filter times are not components of the latter's online timings.
 
-Parallel uses complete times on the same fifty queries per thread count. A safety kill is incomplete, not a capped result.
-
-Memory uses EU, WT, sAU and sSO under [20%,40%], with all four methods complete and all four memory measurements present. Average per-query peaks; retain common-completed counts.
-
-Result-size curves use queries completed by all four methods in each answer-count group. Unknown counts stay unknown; partial counts assign the last bucket only when more than one million answers are certified.
-
-Throughput divides total answers by total time of relevant completed queries. Cross-method throughput comparisons use common-completed queries.
-
-Table IV computes means per standalone parameter setting, then equal-weight means across ten settings. Space/build records come from those same settings. Filter times are not additive components of the separate indexed end-to-end query timings.
-
-The gap-selection figure uses measured timeout rates and theoretical hop bounds. Its first interval has no uniform finite bound and no line point.
-
-## Ablation fields
-
-`support_build_ms` measures candidate filtering and support-graph construction together. When those phases were timed separately, it is their arithmetic sum. `filter_ms` measures only the filtering scan and is empty when no separate scan measurement is available. `ranges_ms` and `plan_ms` measure successor-range preparation and window selection. `search_ms` includes prefix collection and suffix search; its components must not be added again. These stage timers need not sum to the complete online time.
-
-DAG construction and pruning timers apply to explicit-DAG variants. An unused phase can be zero; an unavailable measurement is empty. The ablation table omits memory and path-length diagnostics. Memory comparisons use the separate main-experiment records. `answers`/`path_count` and `event_id_volume`/`output_edge_ids` are matching count aliases for the shared statistics interface.
+The statistics and plotting programs generate their outputs under `results/`.

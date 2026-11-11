@@ -28,14 +28,14 @@ FIELDS = [
     'query_seed', 'method', 'method_id', 'variant',
     'window_mode', 'window_seed', 'workers', 'run_order',
     'src_internal', 'dst_internal', 'x1', 'x2',
-    'delta_min', 'delta_max', 'reference_answers', 'status',
-    'termination', 'online_total_ms', 'capped_ms', 'response_1000_ms',
-    'response_ms', 'answers', 'event_id_volume', 'path_count',
-    'output_edge_ids', 'dag_build_ms', 'dag_prune_ms', 'filter_ms',
-    'support_build_ms', 'ranges_ms', 'plan_ms', 'search_ms',
-    'prefix_ms', 'suffix_ms', 'search_states', 'prefix_states',
-    'suffix_states', 'active_pivots', 'stored_prefixes', 'eligible_events',
-    'retained_events', 'dag_arcs', 'retained_arcs', 'exit_code',
+    'delta_min', 'delta_max', 'status', 'termination',
+    'online_total_ms', 'capped_ms', 'response_1000_ms', 'response_ms',
+    'answers', 'event_id_volume', 'path_count', 'output_edge_ids',
+    'dag_build_ms', 'dag_prune_ms', 'filter_ms', 'ranges_ms',
+    'plan_ms', 'search_ms', 'prefix_ms', 'suffix_ms',
+    'search_states', 'prefix_states', 'suffix_states', 'active_pivots',
+    'stored_prefixes', 'eligible_events', 'retained_events', 'dag_arcs',
+    'retained_arcs', 'exit_code',
 ]
 
 ACTIVE = None
@@ -90,9 +90,7 @@ def check_counts(rows):
     values = {(Decimal(r['answers']), Decimal(r['event_id_volume'])) for r in completed}
     if len(values) > 1:
         raise RuntimeError('completed configurations disagree on answer count or edge-ID total')
-    for r in completed:
-        if r.get('reference_answers') and Decimal(r['answers']) != Decimal(r['reference_answers']):
-            raise RuntimeError('answer count differs from fixed query: ' + case_key(r))
+
 
 
 def summarize_rows(rows):
@@ -229,6 +227,9 @@ def run_one(worker, cache, query, results):
                 row['capped_ms'] = '120000.000000' if row['status'] == 'TIMEOUT' else row['online_total_ms']
                 reached = row.get('response_1000_ms', '')
                 row['response_ms'] = reached if reached and float(reached) >= 0 else row['capped_ms']
+            reference = query.get('reference_answers', '')
+            if row.get('status') == 'OK' and reference and Decimal(row['answers']) != Decimal(reference):
+                row.update(status='ERROR', termination='answer_mismatch')
             return project(row)
         finally:
             if process.poll() is None:
