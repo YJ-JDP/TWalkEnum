@@ -1,0 +1,13 @@
+graph	prepared_filename	collection_reference	input_version
+CM	CollegeMsg.txt	https://snap.stanford.edu/data/CollegeMsg.html	prepared file identified by graph_manifest.tsv
+SD	Slashdot.txt	https://konect.cc/	prepared file identified by graph_manifest.tsv
+EU	email-Eu.txt	https://snap.stanford.edu/data/email-Eu-core-temporal.html	prepared file identified by graph_manifest.tsv
+B09	orbitaal-2016_07_09.txt	https://zenodo.org/records/12581515	prepared file identified by graph_manifest.tsv
+sMO	sx-mathoverflow.txt	https://snap.stanford.edu/data/sx-mathoverflow.html	prepared file identified by graph_manifest.tsv
+SMS	SMS-A.txt	https://snap.stanford.edu/temporal-motifs/data.html	prepared file identified by graph_manifest.tsv
+B08	orbitaal-2016_07_08.txt	https://zenodo.org/records/12581515	prepared file identified by graph_manifest.tsv
+FB	Facebook.txt	https://socialnetworks.mpi-sws.org/data-wosn2009.html	prepared file identified by graph_manifest.tsv
+sAU	sx-askubuntu.txt	https://snap.stanford.edu/data/sx-askubuntu.html	prepared file identified by graph_manifest.tsv
+PR	Prosper.txt	https://konect.cc/	prepared file identified by graph_manifest.tsv
+WT	wiki-talk-temporal.txt	https://snap.stanford.edu/data/wiki-talk-temporal.html	prepared file identified by graph_manifest.tsv
+sSO	sx-stackoverflow.txt	https://snap.stanford.edu/data/sx-stackoverflow.html	prepared file identified by graph_manifest.tsv

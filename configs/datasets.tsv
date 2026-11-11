@@ -1,0 +1,13 @@
+name	filename	vertices	events	span	category
+CM	CollegeMsg.txt	1899	59835	58910	Communication
+SD	Slashdot.txt	51083	140778	90344	Social
+EU	email-Eu.txt	986	332334	69459254	Email
+B09	orbitaal-2016_07_09.txt	190955	494350	84737	Bitcoin
+sMO	sx-mathoverflow.txt	24818	506550	203069367	Q&A
+SMS	SMS-A.txt	44430	548182	29231955	SMS
+B08	orbitaal-2016_07_08.txt	205741	565228	85602	Bitcoin
+FB	Facebook.txt	46952	876993	867938	Social
+sAU	sx-askubuntu.txt	159316	964437	225834462	Q&A
+PR	Prosper.txt	89269	3394979	1258	Lending
+WT	wiki-talk-temporal.txt	1140149	7833140	200483882	Collaboration
+sSO	sx-stackoverflow.txt	2601977	63497050	239705551	Q&A

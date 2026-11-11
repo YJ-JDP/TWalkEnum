@@ -1,0 +1,12 @@
+kernels/*/build/
+**/__pycache__/
+*.pyc
+/runs/
+/validation/
+/cache/
+/.benchmark.lock
+/configs/graphs.tsv
+/configs/ablation_graphs.tsv
+/data/graphs/
+/data/graph_archives/
+*.log

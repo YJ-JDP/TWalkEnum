@@ -1,0 +1,15 @@
+\begin{table*}[t]
+\centering\fontsize{8}{9.6}\selectfont
+\caption{Mean query time of component variants (s)}
+\label{tab:ablation}
+\begin{tabular}{ccccccc}
+\hline
+Graph & \shortstack{EventDAG\\+DFS} & \shortstack{EventDAG\\+BiReach+DFS} & \shortstack{ChronoFilter\\+DirectDFS} & \shortstack{w/o\\ChronoFilter} & \shortstack{Random\\window} & TWalkEnum \\
+\hline
+EU & 120.00 & 23.87 & 23.63 & 12.05 & 18.41 & \textbf{2.77} \\
+WT & 111.78 & 7.40 & 6.44 & 67.42 & 6.94 & \textbf{2.33} \\
+sAU & 120.00 & 13.82 & 13.99 & 20.17 & 14.95 & \textbf{1.53} \\
+sSO & 120.00 & 22.88 & \textbf{17.65} & 117.06 & 21.04 & 18.30 \\
+\hline
+\end{tabular}
+\end{table*}

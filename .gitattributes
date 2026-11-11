@@ -1,0 +1,7 @@
+* text=auto eol=lf
+data/raw/*.tsv -text
+queries/*.tsv -text
+*.gz binary
+*.zip binary
+*.pdf binary
+*.png binary

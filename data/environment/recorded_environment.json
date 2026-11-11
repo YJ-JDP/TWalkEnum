@@ -1,0 +1,15 @@
+{
+  "recorded_main_host": {
+    "machine": "Dell PowerEdge R740",
+    "logical_processors": 80,
+    "memory_GiB": 251,
+    "platform": "Linux-5.8.0-63-generic-x86_64-with-glibc2.29",
+    "python": "3.8.10",
+    "captured_default_gpp_version": "Ubuntu 7.5.0-6ubuntu2"
+  },
+  "artifact_build_profile": {
+    "language": "C++17",
+    "compiler_requirement": "GCC 9 or later",
+    "reference_configuration": "GCC 11, Ubuntu 22.04"
+  }
+}
